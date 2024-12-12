@@ -59,7 +59,7 @@ def format_connections(conns, server_name):
     """
     formatted = [f"Conexiones del servidor: {server_name}"]
     for direction, hosts in conns.items():
-        formatted.append(f"Conexiones {direction.capitalize()}:")
+        formatted.append(f"Conexiones {direction}:")
         for host_, count in hosts.items():
             formatted.append(f"  - {host_}: {count} conexiones")
     return '\n'.join(formatted)
