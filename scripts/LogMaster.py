@@ -8,7 +8,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from lib.file_manager import preprocess_date, format_connections
-from lib.log_procesor import process_log_file_paralelo
+from lib.log_procesor import process_log_file_binary
 
 if __name__ == "__main__":
     # Cronómetro de inicio
@@ -21,12 +21,14 @@ if __name__ == "__main__":
     init_datetime = dt.datetime.strptime(init_datetime_str, datetime_format)
     end_datetime = dt.datetime.strptime(end_datetime_str, datetime_format)
 
+    log_file = 'input-file-10000-2.txt'
+    host = 'Aadvik'
     log_file = 'data/input-file-10000.txt'
     host = 'Savhannah'
 
     # Procesar conexiones
     try:
-        connections = process_log_file_paralelo(log_file, init_datetime, end_datetime, host)
+        connections = process_log_file_binary(log_file, init_datetime, end_datetime, host)
         print(format_connections(connections, host))
     except FileNotFoundError:
         print(f"Error: El archivo '{log_file}' no existe.")
