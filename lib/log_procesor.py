@@ -9,7 +9,6 @@ import os
 # Versión concurrente
 def process_chunk_binary(chunk, init_, end_, target_host):
     """Procesa un fragmento binario decodificado como texto."""
-
     conns_in, conns_out = defaultdict(int), defaultdict(int)
     lines = chunk.splitlines()  # Divide en líneas
 
@@ -37,11 +36,16 @@ def process_chunk_binary(chunk, init_, end_, target_host):
 def merge_results(results):
     """Combina los resultados parciales."""
     final_in, final_out = defaultdict(int), defaultdict(int)
-    for conns_in, conns_out in results:
-        for host, count in conns_in.items():
-            final_in[host] += count
-        for host, count in conns_out.items():
-            final_out[host] += count
+
+    try:
+        for conns_in, conns_out in results:
+            for host, count in conns_in.items():
+                final_in[host] += count
+            for host, count in conns_out.items():
+                final_out[host] += count
+    except Exception as e:
+        raise RuntimeError(f"Error al combinar resultados: {e}")
+
     return {'entrantes': final_in, 'salientes': final_out}
 
 def process_log_file_binary(file_, init_, end_, target_host, num_workers=None):
@@ -58,29 +62,39 @@ def process_log_file_binary(file_, init_, end_, target_host, num_workers=None):
     results = []
     pool = multiprocessing.Pool(num_workers)
     # Leer archivo en bloques
-    with open(file_, 'rb') as f:
-        # Este trozo se explica en Explanation.md
-        leftover = b"" # Esto hace que sea una cadena de bytes
-        while chunk := f.read(chunk_size):
-            chunk = leftover + chunk
-            try:
-                last_newline = chunk.rindex(b'\n')
-                leftover = chunk[last_newline + 1:]
-                chunk = chunk[:last_newline]
-            except ValueError:
-                leftover = chunk
-                continue
+    try:
+        with open(file_, 'rb') as f:
+            # Este trozo se explica en Explanation.md
+            leftover = b"" # Esto hace que sea una cadena de bytes
+            while chunk := f.read(chunk_size):
+                chunk = leftover + chunk
+                try:
+                    last_newline = chunk.rindex(b'\n')
+                    leftover = chunk[last_newline + 1:]
+                    chunk = chunk[:last_newline]
+                except ValueError:
+                    leftover = chunk
+                    continue
+                try:
+                    decoded_chunk = chunk.decode('utf-8')  # Decodificar como texto
+                except UnicodeDecodeError as e:
+                    print(f"Error al decodificar fragmento: {e}")
+                    continue
 
-            decoded_chunk = chunk.decode('utf-8')  # Decodificar como texto
-            # Procesar el fragmento en paralelo
-            results.append(pool.apply_async(process_chunk_binary, (decoded_chunk, init_, end_, target_host)))
-
-    pool.close()
-    pool.join()
+                # Procesar el fragmento en paralelo
+                results.append(pool.apply_async(process_chunk_binary, (decoded_chunk, init_, end_, target_host)))
+    except (OSError, IOError) as e:
+        raise FileNotFoundError(f"Error al leer el archivo {file_} : {e}")
+    finally:
+        pool.close()
+        pool.join()
 
     # Combinar resultados parciales
-    processed_results = [res.get() for res in results]
-    return merge_results(processed_results)
+    try:
+        processed_results = [res.get() for res in results]
+        return merge_results(processed_results)
+    except Exception as e:
+        raise RuntimeError(f"Error al combinar resultados: {e}")
 
 # Versión distribuida con Spark
 

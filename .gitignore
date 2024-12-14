@@ -162,3 +162,4 @@ cython_debug/
 
 input-file-10000.txt
 data/input-file-10000-2.txt
+data/test.txt
