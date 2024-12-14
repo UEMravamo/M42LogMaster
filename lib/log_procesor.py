@@ -1,21 +1,12 @@
+# Librería para procesamiento y análisis de logs
+
 from collections import defaultdict
 import multiprocessing
 import os
 
-def preprocess_date(date_str):
-    """Convierte nombres de días y meses en español a inglés directamente(no me funciona la librería locale)."""
-    return (date_str
-            .replace("Lunes", "Monday").replace("Martes", "Tuesday")
-            .replace("Miércoles", "Wednesday").replace("Jueves", "Thursday")
-            .replace("Viernes", "Friday").replace("Sábado", "Saturday")
-            .replace("Domingo", "Sunday")
-            .replace("enero", "January").replace("febrero", "February")
-            .replace("marzo", "March").replace("abril", "April")
-            .replace("mayo", "May").replace("junio", "June")
-            .replace("julio", "July").replace("agosto", "August")
-            .replace("septiembre", "September").replace("octubre", "October")
-            .replace("noviembre", "November").replace("diciembre", "December"))
+# Versión tradicional
 
+# Versión concurrente
 def process_trozo(trozo, init_, end_, target_host):
     """Procesa un trozo del archivo de log"""
     conns_entrantes, conns_salientes = defaultdict(int), defaultdict(int)
@@ -79,11 +70,10 @@ def process_log_file_paralelo(file_, init_, end_, target_host, procesos=None):
     res_procesados = [res.get() for res in results]
     return combinar_results(res_procesados)
 
-def format_connections(conns, server_name):
-    """Formatea el output para ver el número de conexiones por host."""
-    formatted = [f"Conexiones del servidor: {server_name}"]
-    for direction, hosts in conns.items():
-        formatted.append(f"Conexiones {direction}:")
-        for host_, count in hosts.items():
-            formatted.append(f"  - {host_}: {count} conexiones ")
-    return '\n'.join(formatted)
+# Versión distribuida con Spark
+
+# versión distribuida con Hadoop
+
+# Versión distribuida con Dask
+
+# Versión distribuida con Ray
