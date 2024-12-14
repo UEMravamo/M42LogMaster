@@ -21,9 +21,7 @@ if __name__ == "__main__":
     init_datetime = dt.datetime.strptime(init_datetime_str, datetime_format)
     end_datetime = dt.datetime.strptime(end_datetime_str, datetime_format)
 
-    log_file = 'input-file-10000-2.txt'
-    host = 'Aadvik'
-    log_file = 'data/input-file-10000.txt'
+    log_file = '../data/input-file-10000-2.txt'
     host = 'Savhannah'
 
     # Procesar conexiones
