@@ -73,3 +73,24 @@ En este modo, la herramienta debe emitir cada hora:
 - Escribe código conforme a PEP8.
 - Escribe algunas pruebas (considera usar pytest o uniitest).
 - Documenta tu solución en un archivo.
+  
+---
+  ## Estructura del proyecto 
+```
+LogMaster/
+├── .idea/                                
+├── data/                                   # Dataset de logs
+│   ├── input-file-10000.txt    
+│   └── test.txt              
+├── lib/                                    
+│   ├── file_manager.py                     # Librería para la gestión y carga de archivos de log
+│   └── log_processor.py                    # Librería para procesamiento y análisis de logs
+├── scripts/                                
+│   ├── last_hour_log_processor.py          # Script para generar resumen de conexiones en la última hora
+│   └── LogMaster.py                        # Script para listar conexiones de un host en un periodo de tiempo
+├── tests/                                  
+│   ├── Pruebas_unitarias                   
+│   └── Pruebas_rendimiento
+├── .gitignore                             
+└── README.md
+```
