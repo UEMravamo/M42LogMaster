@@ -162,3 +162,4 @@ cython_debug/
 #.idea/
 
 input-file-10000.txt
+input-file-10000-2.txt
