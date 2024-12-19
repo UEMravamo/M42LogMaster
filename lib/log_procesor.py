@@ -24,8 +24,8 @@ def process_chunk_binary(chunk, init_, end_, target_host):
             # Si hay un error, pasar a la siguiente línea
             continue
 
-        # Solo procesar si el timestamp está dentro del rango
-        if init_ <= timestamp <= end_:
+        # Solo procesar si el timestamp está dentro del rango + 5 minutos
+        if (init_-300) <= timestamp <= (end_+300):
             if src_host == target_host:
                 conns_out[dst_host] += 1
             if dst_host == target_host:
