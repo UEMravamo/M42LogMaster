@@ -3,8 +3,38 @@
 from collections import defaultdict
 import multiprocessing
 import os
+import networkx as nx
+import datetime
 
-# Versión tradicional
+# Versión Secuencial 
+
+# Versión Grafo
+# Función para leer el archivo de log y construir el grafo
+def build_graph(log_file):
+
+    # Inicializamos el grafo
+    G = nx.DiGraph()  
+
+    # Leemos el log
+    with open(log_file, 'r') as f:
+        for line in f:
+           
+            parts = line.strip().split()
+            timestamp = int(parts[0])
+            host_from = parts[1]
+            host_to = parts[2]
+            
+            # Añadir nodos (hosts) al grafo
+            if not G.has_node(host_from):
+                G.add_node(host_from)
+            if not G.has_node(host_to):
+                G.add_node(host_to)
+            
+            # Añadimos aristas (conexiones entre hosts) con atributo timestamp asociado
+            G.add_edge(host_from, host_to, timestamp=timestamp) 
+    
+    return G
+
 
 # Versión concurrente
 def process_chunk_binary(chunk, init_, end_, target_host):
@@ -100,6 +130,3 @@ def process_log_file_binary(file_, init_, end_, target_host, num_workers=None):
 
 # versión distribuida con Hadoop
 
-# Versión distribuida con Dask
-
-# Versión distribuida con Ray
