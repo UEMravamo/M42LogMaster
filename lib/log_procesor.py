@@ -4,39 +4,57 @@ from collections import defaultdict
 import multiprocessing
 import os
 import networkx as nx
-import datetime
+from datetime import datetime
+import itertools
 
-# Versión Secuencial 
+##### Versión Secuencial #### 
 
-# Versión Grafo
+##### Versión Grafo ####
+
 # Función para leer el archivo de log y construir el grafo
 def build_graph(log_file):
-
     # Inicializamos el grafo
-    G = nx.DiGraph()  
+    G = nx.DiGraph()
 
     # Leemos el log
     with open(log_file, 'r') as f:
         for line in f:
-           
+            # Procesar línea del log y generar partes del grafo
             parts = line.strip().split()
             timestamp = int(parts[0])
             host_from = parts[1]
             host_to = parts[2]
-            
+
+            # Convertir timestamp a formato datetime
+            timestamp_datetime = datetime.utcfromtimestamp(timestamp / 1000)
+
+            # Formatear el timestamp al formato "%A, %d de %B de %Y %H:%M:%S"
+            timestamp_str = timestamp_datetime.strftime("%A, %d de %B de %Y %H:%M:%S")
+
             # Añadir nodos (hosts) al grafo
             if not G.has_node(host_from):
                 G.add_node(host_from)
             if not G.has_node(host_to):
                 G.add_node(host_to)
-            
-            # Añadimos aristas (conexiones entre hosts) con atributo timestamp asociado
-            G.add_edge(host_from, host_to, timestamp=timestamp) 
+
+            # Añadir aristas (conexiones entre hosts) con atributo timestamp formateado
+            G.add_edge(host_from, host_to, timestamp=timestamp_str)
+
+    # Imprimir grafo
+    print(f"\nGrafo generado exitosamente con {G.number_of_nodes()} nodos(hosts) y (aristas) {G.number_of_edges()} aristas.")
+        
+    print("\nNodos (hosts) del grafo:")
+    for node in itertools.islice(G.nodes, 10):
+        print(node)
+    
+    print("\nAristas (Conexiones) del grafo:")
+    for host_from, host_to, data in itertools.islice(G.edges(data=True), 10):
+        timestamp = data.get('timestamp', 'No timestamp')  
+        print(f"{timestamp} - {host_from} --> {host_to}")
     
     return G
 
-
-# Versión concurrente
+#### Versión concurrente ####
 def process_chunk_binary(chunk, init_, end_, target_host):
     """Procesa un fragmento binario decodificado como texto."""
     conns_in, conns_out = defaultdict(int), defaultdict(int)
@@ -126,7 +144,7 @@ def process_log_file_binary(file_, init_, end_, target_host, num_workers=None):
     except Exception as e:
         raise RuntimeError(f"Error al combinar resultados: {e}")
 
-# Versión distribuida con Spark
+#### Versión distribuida con Spark ####
 
-# versión distribuida con Hadoop
+#### versión distribuida con Hadoop ####
 
