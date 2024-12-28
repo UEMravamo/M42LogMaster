@@ -50,5 +50,6 @@ grafo = build_graph(log_file)
     print(f"Tiempo promedio para build_graph: {build_graph_time / 50:.4f} segundos")
     print(f"Tiempo promedio para find_connections_in_time_range: {find_connections_time / 50:.4f} segundos")
     print("----------------------------------------------------------------------------")
+    
 if __name__ == "__main__":
     test_performance()
