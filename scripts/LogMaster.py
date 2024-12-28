@@ -4,7 +4,7 @@ import datetime as dt
 import time
 import os
 import sys
-import networkx as nx
+import itertools
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -45,11 +45,13 @@ if __name__ == "__main__":
         print(f"Error en la configuración de fechas: {e}")
         sys.exit(1)
 
+    print("\nBuscando conexiones al hot ",host,"entre ",init_datetime," y ", end_datetime)
+    print("----------------------------------------------------------------------------------------")
+
     # PROCESADO GRAFO
-    # creamos el grafo
+    # Creamos el grafo
     try:
         graph = build_graph(log_file)
-        print(f"Grafo generado exitosamente con {graph.number_of_nodes()} nodos y {graph.number_of_edges()} aristas.")
     except Exception as e:
         print(f"Error al generar el grafo: {e}")
         sys.exit(1)
@@ -67,4 +69,4 @@ if __name__ == "__main__":
 
     # Cronómetro de fin
     end = time.time()
-    print(f"Tiempo total de ejecución: {end - start:.10f} segundos.")
+    print(f"\nTiempo total de ejecución: {end - start:.10f} segundos.\n")
