@@ -7,40 +7,50 @@ from functools import wraps
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from lib.log_procesor import build_graph, find_connections_in_time_range
 
-def measure_memory(func):
+def measure_memory_and_cpu(func):
 
-    # Definimos la envoltura de la función (lo que ará antes y después de ejecutar la función)
+    # Definimos la envoltura de la función (lo que hará antes y después de ejecutar la función)
     @wraps(func)
     def wrapper(*args, **kwargs):
         process = psutil.Process()
 
         # Medimos la memoria usada antes de llamar a la función
-        start_memory = process.memory_info().rss / (1024 * 1024)
+        start_memory = process.memory_info().rss / (1024 * 1024)  # Memoria en MB
 
-        # Ejecutar la función
+        # Medimos el uso de CPU antes de ejecutar la función
+        start_cpu = process.cpu_percent(interval=2)
+
+        # Ejecutamos la función
         result = func(*args, **kwargs)
 
-        # Medimos la memoria usada después de llamar a la función JUSTO DESPUÉS de que la función termine
+        # Medimos la memoria usada después de llamar a la función
         end_memory = process.memory_info().rss / (1024 * 1024)
 
-        # Calcular diferencia de memoeria nates y después
+        # Medimos el uso de CPU después de ejecutar la función
+        end_cpu = process.cpu_percent(interval=2)
+
+        # Calculamos la diferencia de memoria antes y después
         memory_usage = end_memory - start_memory
-        
-        # Imprimimos resultados
+
+        # Calculamos la diferencia de uso de CPU antes y después
+        cpu_usage = end_cpu - start_cpu
+
+        # Imprimimos los resultados
         print(f"Función: {func.__name__}")
         print(f"Uso de memoria: {memory_usage:.4f} MB")
+        print(f"Uso de CPU: {cpu_usage:.4f}%")
 
         return result
     return wrapper
 
-# Añadimos el decorador de @measure_memory a test_build_graph() para poder medir la memoria utilizada antes y después de ejecutar la función
-@measure_memory
+# Añadimos el decorador de @measure_memory_and_cpu a test_build_graph() para poder medir la memoria y CPU utilizadas antes y después de ejecutar la función
+@measure_memory_and_cpu
 def test_build_graph():
     log_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'input-file-10000.txt'))
     return build_graph(log_file)
- 
-# Añadimos el decorador de @measure_memory a test_find_connections_in_time_range() para poder medir la memoria utilizada antes y después de ejecutar la función
-@measure_memory
+
+# Añadimos el decorador de @measure_memory_and_cpu a test_find_connections_in_time_range() para poder medir la memoria y CPU utilizadas antes y después de ejecutar la función
+@measure_memory_and_cpu
 def test_find_connections_in_time_range(grafo):
     # Definimos start_time y end_time como objetos datetime para pasarle a la función como rango de búsqueda
     start_time = datetime.fromtimestamp(1672531200)
@@ -48,8 +58,8 @@ def test_find_connections_in_time_range(grafo):
     return find_connections_in_time_range(grafo, 'hostname_example', start_time, end_time)
 
 if __name__ == "__main__":
-    # LLamamos a test_build_graph con el decorador para medir la memoria utilizada antes y después de ejecutar la función
+    # Llamamos a test_build_graph con el decorador para medir la memoria y CPU utilizadas antes y después de ejecutar la función
     grafo = test_build_graph()
 
-   # LLamamos a test_find_connections con el decorador para medir la memoria utilizada antes y después de ejecutar la función
+    # Llamamos a test_find_connections con el decorador para medir la memoria y CPU utilizadas antes y después de ejecutar la función
     test_find_connections_in_time_range(grafo)
