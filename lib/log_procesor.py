@@ -27,9 +27,7 @@ def build_graph(log_file):
 
             # Convertir timestamp a formato datetime
             timestamp_datetime = datetime.utcfromtimestamp(timestamp / 1000)
-
-            # Formatear el timestamp al formato "%A, %d de %B de %Y %H:%M:%S"
-            timestamp_str = timestamp_datetime.strftime("%A, %d de %B de %Y %H:%M:%S")
+            timestamp_str = timestamp_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
             # Añadir nodos (hosts) al grafo
             if not G.has_node(host_from):
@@ -41,18 +39,49 @@ def build_graph(log_file):
             G.add_edge(host_from, host_to, timestamp=timestamp_str)
 
     # Imprimir grafo
-    print(f"\nGrafo generado exitosamente con {G.number_of_nodes()} nodos(hosts) y (aristas) {G.number_of_edges()} aristas.")
-        
-    print("\nNodos (hosts) del grafo:")
-    for node in itertools.islice(G.nodes, 10):
-        print(node)
+    print(f"\n  - Grafo generado exitosamente con {G.number_of_nodes()} nodos(hosts) y (aristas) {G.number_of_edges()} aristas.\n")
     
-    print("\nAristas (Conexiones) del grafo:")
+    print("  - Nodos (hosts) del grafo:")
+    for node in itertools.islice(G.nodes, 10):
+        print("      ",node)
+    
+    print("\n  - Aristas (Conexiones) del grafo:")
     for host_from, host_to, data in itertools.islice(G.edges(data=True), 10):
         timestamp = data.get('timestamp', 'No timestamp')  
-        print(f"{timestamp} - {host_from} --> {host_to}")
-    
+        print(f"      {timestamp} - {host_from} --> {host_to}")
+
     return G
+
+def find_connections_in_time_range(grafo, hostname, start_time, end_time):
+    connected_hosts = set()
+
+    # Evitamos errores al comparar fechas comprobando que start_time y end_time son objetos datetime
+    if isinstance(start_time, str):
+        start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+    if isinstance(end_time, str):
+        end_time = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+
+    # Iterar sobre las aristas del grafo
+    for edge in grafo.edges(data=True):
+        host_from, host_to, data = edge
+        timestamp = data['timestamp']
+        
+        # Evitamos errores al comparar fechas pasando timestamp a datetime si es una cadena
+        if isinstance(timestamp, str):
+            timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+
+        #print(host_from, " -> ", host_to, "  -  ", start_time,"-", end_time, " -> ", timestamp)
+
+        # Verificar si el timestamp está dentro del rango
+        if start_time <= timestamp <= end_time:
+            if host_from == hostname:
+                # Si el host especificado es el origen, añadimos el destino
+                connected_hosts.add(host_to)  
+            elif host_to == hostname:
+                # Si el host especificado es el destino, añadimos el origen
+                connected_hosts.add(host_from)  
+
+    return connected_hosts
 
 #### Versión concurrente ####
 def process_chunk_binary(chunk, init_, end_, target_host):

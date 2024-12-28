@@ -9,7 +9,7 @@ import itertools
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from lib.file_manager import preprocess_date, format_connections
-from lib.log_procesor import process_log_file_binary, build_graph
+from lib.log_procesor import process_log_file_binary, build_graph, find_connections_in_time_range
 
 if __name__ == "__main__":
     # Cronómetro de inicio
@@ -44,9 +44,10 @@ if __name__ == "__main__":
     except ValueError as e:
         print(f"Error en la configuración de fechas: {e}")
         sys.exit(1)
-
-    print("\nBuscando conexiones al hot ",host,"entre ",init_datetime," y ", end_datetime)
-    print("----------------------------------------------------------------------------------------")
+        
+    print("\n-------------------------------------------------------------------------------------------")
+    print("Buscando conexiones al hot ",host,"entre ",init_datetime," y ", end_datetime)
+    print("-------------------------------------------------------------------------------------------\n")
 
     # PROCESADO GRAFO
     # Creamos el grafo
@@ -55,6 +56,20 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error al generar el grafo: {e}")
         sys.exit(1)
+
+    try:
+        connected_hosts = find_connections_in_time_range(graph, host, init_datetime, end_datetime)
+        
+        if connected_hosts:
+            print(f"\nHosts conectados a {host} entre el {preprocess_date(init_datetime.strftime('%A, %d de %B de %Y %H:%M:%S'))} y {preprocess_date(end_datetime.strftime('%A, %d de %B de %Y %H:%M:%S'))}:")
+            
+            for connected_host in connected_hosts:
+                print(connected_host)
+        else:
+            print(f"\nNo se encontraron hosts conectados ")
+
+    except Exception as e:
+        print(f"Error al obtener las conexiones: {e}")
 
     # PROCESADO CONCURRENTE
     """
