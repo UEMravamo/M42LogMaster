@@ -41,19 +41,23 @@ def build_graph(log_file):
     # Imprimir grafo
     print(f"\n  - Grafo generado exitosamente con {G.number_of_nodes()} nodos(hosts) y (aristas) {G.number_of_edges()} aristas.\n")
     
-    print("  - Nodos (hosts) del grafo:")
+    print("  - Primeros Nodos (hosts) del grafo:")
     for node in itertools.islice(G.nodes, 10):
-        print("      ",node)
+        print("\t",node)
     
-    print("\n  - Aristas (Conexiones) del grafo:")
+    print("\n  - Primeras Aristas (Conexiones) del grafo:")
     for host_from, host_to, data in itertools.islice(G.edges(data=True), 10):
         timestamp = data.get('timestamp', 'No timestamp')  
-        print(f"      {timestamp} - {host_from} --> {host_to}")
+        print(f"\t{timestamp} - {host_from} --> {host_to}")
 
     return G
 
 def find_connections_in_time_range(grafo, hostname, start_time, end_time):
-    connected_hosts = set()
+    # Diccionario para almacenar las conexiones entrantes y salientes
+    connections = {
+        'entrantes': defaultdict(int),  # Conexiones entrantes
+        'salientes': defaultdict(int)   # Conexiones salientes
+    }
 
     # Evitamos errores al comparar fechas comprobando que start_time y end_time son objetos datetime
     if isinstance(start_time, str):
@@ -70,18 +74,16 @@ def find_connections_in_time_range(grafo, hostname, start_time, end_time):
         if isinstance(timestamp, str):
             timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
 
-        #print(host_from, " -> ", host_to, "  -  ", start_time,"-", end_time, " -> ", timestamp)
-
         # Verificar si el timestamp está dentro del rango
         if start_time <= timestamp <= end_time:
             if host_from == hostname:
-                # Si el host especificado es el origen, añadimos el destino
-                connected_hosts.add(host_to)  
+                # Si el host especificado es el origen, añadimos al diccionario de salientes
+                connections['salientes'][host_to] += 1  
             elif host_to == hostname:
-                # Si el host especificado es el destino, añadimos el origen
-                connected_hosts.add(host_from)  
+                # Si el host especificado es el destino, añadimos al diccionario de entrantes
+                connections['entrantes'][host_from] += 1  
 
-    return connected_hosts
+    return connections
 
 #### Versión concurrente ####
 def process_chunk_binary(chunk, init_, end_, target_host):
@@ -176,4 +178,3 @@ def process_log_file_binary(file_, init_, end_, target_host, num_workers=None):
 #### Versión distribuida con Spark ####
 
 #### versión distribuida con Hadoop ####
-
