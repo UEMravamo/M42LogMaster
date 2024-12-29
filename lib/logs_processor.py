@@ -4,8 +4,6 @@ from collections import defaultdict
 import multiprocessing
 import os
 
-# Versión tradicional
-
 # Versión concurrente
 def process_chunk_binary(chunk, init_, end_, target_host):
     """Procesa un fragmento binario decodificado como texto."""

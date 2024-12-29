@@ -8,7 +8,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from lib.file_manager import preprocess_date, format_connections
-from lib.log_procesor import process_log_file_binary
+from lib.logs_processor import process_log_file_binary
 
 if __name__ == "__main__":
     # Cronómetro de inicio
@@ -16,9 +16,9 @@ if __name__ == "__main__":
 
     # Configuración de variables
     log_file = '../data/input-file-10000-2.txt'
-    host = 'Savhannah'
-    init_datetime_str = "Martes, 13 de agosto de 2019 01:00:00"
-    end_datetime_str = "Martes, 13 de agosto de 2019 21:00:00"
+    host = 'Aadvik'
+    init_datetime_str = "Martes, 13 de agosto de 2015 01:00:00"
+    end_datetime_str = "Martes, 13 de agosto de 2020 21:00:00"
     datetime_format = "%A, %d de %B de %Y %H:%M:%S"
 
     # Validar el archivo
