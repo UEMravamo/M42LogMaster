@@ -60,7 +60,7 @@ def test_process_log_file_binary_empty_file():
         temp_file.close()
 
         try:
-            results = process_log_file_binary(temp_file.name, init_, end_, target_host, num_workers=2)
+            results = process_log_file_binary(temp_file.name, init_, end_, target_host, num_workers=cpu_count())
         finally:
             os.remove(temp_file.name)  # Limpiar el archivo temporal
 
@@ -80,7 +80,7 @@ def test_process_log_file_binary_with_only_invalid_lines():
         temp_file.close()
 
         try:
-            results = process_log_file_binary(temp_file.name, init_, end_, target_host, num_workers=2)
+            results = process_log_file_binary(temp_file.name, init_, end_, target_host, num_workers=cpu_count())
         finally:
             os.remove(temp_file.name)  # Limpiar el archivo temporal
 
