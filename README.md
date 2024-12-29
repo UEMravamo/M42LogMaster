@@ -101,5 +101,4 @@ LogMaster/
 Puedes acceder a la documentación completa del proyecto [aquí](https://docs.google.com/document/d/1vvBf8FPUfStvpJqVeKR10krPRe5Z5PtCnuP5KiehfOc/edit?usp=sharing).
 
 ## Presentación
-Consulta la presentación del proyecto en Canva [aquí](https://www.canva.com/design/DAGaq8qf9KM/_rmWSxuIrcZKAYpBYipJew/edit?utm_content=DAGaq8qf9KM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton).
-
+Consulta la presentación del proyecto en Canva [aquí](https://docs.google.com/presentation/d/1wrV6Ooe8k7wmccb6YEOVrjVAIGUhozd4/edit?usp=sharing&ouid=113986353646284854490&rtpof=true&sd=true).
