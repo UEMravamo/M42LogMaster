@@ -79,18 +79,27 @@ En este modo, la herramienta debe emitir cada hora:
 ```
 LogMaster/
 ├── .idea/                                
-├── data/                                   # Dataset de logs
-│   ├── input-file-10000.txt    
-│   └── test.txt              
+├── data/                                   
+│   ├── input-file-10000.txt                # Dataset original de logs
+│   └── file_generator.py                   # Script para crear datasets aleatorios de prueba con cierta longitud  
 ├── lib/                                    
-│   ├── file_manager.py                     # Librería para la gestión y carga de archivos de log
+│   ├── file_manager.py                     # Librería para la gestión de inputs y outputs de la app
 │   └── log_processor.py                    # Librería para procesamiento y análisis de logs
 ├── scripts/                                
 │   ├── last_hour_log_processor.py          # Script para generar resumen de conexiones en la última hora
-│   └── LogMaster.py                        # Script para listar conexiones de un host en un periodo de tiempo
-├── tests/                                  
-│   ├── Pruebas_unitarias                   
-│   └── Pruebas_rendimiento
+│   └── LogMaster.py                        # Script para listar conexiones de un host en un rango de tiempo
+├── tests/
+│   ├── unit_tests/                         # Pruebas unitarias de las funciones de la aplicación
+│   ├── resource_usage_tests/               # Pruebas para medir el uso de recursos como CPU y memoria
+│   └── performance_tests/                  # Pruebas de rendimiento para evaluar la eficiencia (tiempos de ejecución) de las funciones de la aplicación
 ├── .gitignore                             
 └── README.md
+
 ```
+
+## Documentación
+Puedes acceder a la documentación completa del proyecto [aquí](https://docs.google.com/document/d/1vvBf8FPUfStvpJqVeKR10krPRe5Z5PtCnuP5KiehfOc/edit?usp=sharing).
+
+## Presentación
+Consulta la presentación del proyecto en Canva [aquí](https://www.canva.com/design/DAGaq8qf9KM/_rmWSxuIrcZKAYpBYipJew/edit?utm_content=DAGaq8qf9KM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton).
+
