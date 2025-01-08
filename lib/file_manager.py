@@ -17,9 +17,9 @@ def preprocess_date(date_str):
 # Generar el output
 def format_connections(conns, server_name):
     """Formatea el output para ver el número de conexiones por host."""
-    formatted = [f"Conexiones del servidor: {server_name}"]
+    formatted = [f"\n  - Conexiones del host: {server_name}"]
     for direction, hosts in conns.items():
-        formatted.append(f"Conexiones {direction}:")
+        formatted.append(f"\n \t Conexiones {direction.capitalize()}:\n")
         for host_, count in hosts.items():
-            formatted.append(f"  - {host_}: {count} conexiones ")
+            formatted.append(f"\t  - {host_}: {count} conexión{'es' if count > 1 else ''}")
     return '\n'.join(formatted)
