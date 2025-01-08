@@ -26,7 +26,6 @@ def analisis_tiempo_real():
     estadistica = {}
     for node in grafo.nodes():
         conexiones = find_connections_in_time_range(grafo, node, una_hora, tiempo_inicio)
-        print(f"Conexiones para {node}: {conexiones}")
         estadistica[node] = {
             'entrantes': sum(conexiones['entrantes'].values()),
             'salientes': sum(conexiones['salientes'].values())
