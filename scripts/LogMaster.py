@@ -8,7 +8,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from lib.file_manager import preprocess_date, format_connections
-from lib.log_procesor import process_log_file_binary
+from lib.logs_processor import process_log_file_binary
 
 if __name__ == "__main__":
     # Cronómetro de inicio

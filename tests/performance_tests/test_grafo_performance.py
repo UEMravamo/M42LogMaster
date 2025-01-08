@@ -1,10 +1,9 @@
-import timeit
 import os
 import sys
-from datetime import datetime
+import timeit
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from lib.log_procesor import build_graph, find_connections_in_time_range
+
 
 def test_performance():
     # Archivo de logs

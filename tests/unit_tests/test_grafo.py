@@ -6,7 +6,7 @@ import sys
 # Configura el path para que Python pueda encontrar el directorio 'lib'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from lib.log_procesor import build_graph, find_connections_in_time_range
+from lib.logs_processor import build_graph, find_connections_in_time_range
 
 class TestGraphFunctions(unittest.TestCase):
 
