@@ -4,7 +4,6 @@ import itertools
 from collections import defaultdict
 import multiprocessing
 import os
-
 import networkx as nx
 
 
@@ -99,8 +98,6 @@ def process_log_file_binary(file_, init_, end_, target_host, num_workers=None):
         raise RuntimeError(f"Error al combinar resultados: {e}")
 
 ### Version Grafo ###
-
-
 # Función para leer el archivo de log y construir el grafo
 def build_graph(log_file):
     # Inicializamos el grafo
@@ -116,7 +113,7 @@ def build_graph(log_file):
             host_to = parts[2]
 
             # Convertir timestamp a formato datetime
-            timestamp_datetime = datetime.utcfromtimestamp(timestamp / 1000)
+            timestamp_datetime = datetime.datetime.utcfromtimestamp(timestamp / 1000)
             timestamp_str = timestamp_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
             # Añadir nodos (hosts) al grafo
@@ -142,8 +139,6 @@ def build_graph(log_file):
         print(f"\t{timestamp} - {host_from} --> {host_to}")
 
     return G
-
-
 def find_connections_in_time_range(grafo, hostname, start_time, end_time):
     # Diccionario para almacenar las conexiones entrantes y salientes
     connections = {
@@ -205,7 +200,6 @@ def process_chunk_binary(chunk, init_, end_, target_host):
 
     return conns_in, conns_out
 
-
 def merge_results(results):
     """Combina los resultados parciales."""
     final_in, final_out = defaultdict(int), defaultdict(int)
@@ -220,7 +214,6 @@ def merge_results(results):
         raise RuntimeError(f"Error al combinar resultados: {e}")
 
     return {'entrantes': final_in, 'salientes': final_out}
-
 
 def process_log_file_binary(file_, init_, end_, target_host, num_workers=None):
     """
