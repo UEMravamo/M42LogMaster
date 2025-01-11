@@ -1,16 +1,21 @@
 # Procesar los registros de la última hora y crear estadísticas
-#   - Obtener hostnames conectados al host configurado en la última hora.
-#   - Obtener hostnames que recibieron conexiones del host configurado en la última hora.
-#   - Obtener hostname que generó más conexiones en la última hora.
+# - Obtener hostnames conectados al host configurado en la última hora.
+# - Obtener hostnames que recibieron conexiones del host configurado en la última hora.
+# - Obtener hostname que generó más conexiones en la última hora.
+
 import sys
 import os
 import time
 from datetime import datetime, timedelta
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from lib.log_procesor import build_graph, find_connections_in_time_range
+from datetime import datetime
 
-#Ruta a log
-ruta_log = '../data/input-file-10000.txt'
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from lib.logs_processor import process_log_file_binary, build_graph, find_connections_in_time_range
+
+# Ruta a log
+ruta_log = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/input-file-10000.txt'))
 
 def analisis_tiempo_real():
     #Analizar cada hora

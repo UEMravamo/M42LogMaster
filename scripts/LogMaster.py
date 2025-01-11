@@ -1,4 +1,4 @@
-# Script para listar conexiones de un host en un periodo de tiempo
+# Script para listar conexiones de un host y generar un grafo a partir del log
 
 import datetime as dt
 import time
@@ -8,14 +8,12 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from lib.file_manager import preprocess_date, format_connections
-from lib.logs_processor import process_log_file_binary
+from lib.logs_processor import process_log_file_binary, build_graph, find_connections_in_time_range
 
 if __name__ == "__main__":
-    # Cronómetro de inicio
-    start = time.time()
-
+    
     # Configuración de variables
-    log_file = '../data/input-file-10000-2.txt'
+    log_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/input-file-10000.txt'))
     host = 'Savhannah'
     init_datetime_str = "Martes, 13 de agosto de 2019 01:00:00"
     end_datetime_str = "Martes, 13 de agosto de 2019 21:00:00"
@@ -43,8 +41,48 @@ if __name__ == "__main__":
     except ValueError as e:
         print(f"Error en la configuración de fechas: {e}")
         sys.exit(1)
+        
+    print("\n....................................................................................................")
+    print("Buscando conexiones al hot ",host,"entre ",init_datetime," y ", end_datetime)
+    print("....................................................................................................\n")
 
-    # Procesar conexiones
+    #### V1- PROCESADO SECUENCIAL ####
+    print("\n-------------------------------------------------------------------------------------------")
+    print("MÉTODO 1: PROCESADO SECUENCIAL")
+    print("-------------------------------------------------------------------------------------------\n")
+
+
+    #### V2-PROCESADO CON GRAFO ####
+    print("\n-------------------------------------------------------------------------------------------")
+    print("MÉTODO 2: GRAFO")
+    print("-------------------------------------------------------------------------------------------\n")
+
+    # Creamos el grafo
+    try:
+        graph = build_graph(log_file)
+    except Exception as e:
+        print(f"Error al generar el grafo: {e}")
+        sys.exit(1)
+
+    # Buscamos las conexiones
+    try:
+        connected_hosts = find_connections_in_time_range(graph, host, init_datetime, end_datetime)
+        
+        if connected_hosts:
+            print(format_connections(connected_hosts, host))
+           
+        else:
+            print(f"\nNo se encontraron hosts conectados ")
+
+    except Exception as e:
+        print(f"Error al obtener las conexiones: {e}")
+
+
+    #### V3 -PROCESADO CONCURRENTE ####
+    print("\n-------------------------------------------------------------------------------------------")
+    print("MÉTODO 3: PROCESAMIENTO CONCURRENTE")
+    print("-------------------------------------------------------------------------------------------\n")
+    
     try:
         connections = process_log_file_binary(log_file, init_datetime, end_datetime, host)
         print(format_connections(connections, host))
@@ -52,7 +90,10 @@ if __name__ == "__main__":
         print(f"Error: El archivo '{log_file}' no existe.")
     except Exception as e:
         print(f"Error inesperado durante el procesamiento de conexiones: {e}")
-
-    # Cronómetro de fin
-    end = time.time()
-    print(f"Tiempo total de ejecución: {end - start:.10f} segundos ")
+    
+    
+    #### V4- PROCESADO DISTRIBUIDO ####
+    print("\n-------------------------------------------------------------------------------------------")
+    print("MÉTODO 4: PROCESAMIENTO DISTRIBUIDO")
+    print("-------------------------------------------------------------------------------------------\n")
+    
