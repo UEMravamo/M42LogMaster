@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from lib.file_manager import preprocess_date, format_connections
 from lib.logs_processor import process_log_file_binary, build_graph, find_connections_in_time_range
+from lib.logs_processor import process_log_spark
 
 if __name__ == "__main__":
     
@@ -92,8 +93,23 @@ if __name__ == "__main__":
         print(f"Error inesperado durante el procesamiento de conexiones: {e}")
     
     
-    #### V4- PROCESADO DISTRIBUIDO ####
+    #### PROCESADO DISTRIBUIDO ####
     print("\n-------------------------------------------------------------------------------------------")
-    print("MÉTODO 4: PROCESAMIENTO DISTRIBUIDO")
+    print("MÉTODO 4: PROCESAMIENTO DISTRIBUIDO CON SPARK")
     print("-------------------------------------------------------------------------------------------\n")
-    
+
+    # Procesamiento con Spark
+    try:
+        incoming_connections, outgoing_connections = process_log_spark(log_file, host, init_datetime_str, end_datetime_str, datetime_format)
+        
+        if incoming_connections and outgoing_connections:
+            print("\nConexiones entrantes:")
+            incoming_connections.show(truncate=False)
+            print("\nConexiones salientes:")
+            outgoing_connections.show(truncate=False)
+        
+    except Exception as e:
+        print(f"Error en el procesamiento con Spark: {e}")
+    finally:
+        # Cronómetro de fin
+        end = time.time()

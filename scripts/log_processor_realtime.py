@@ -4,10 +4,6 @@ import time
 from datetime import datetime, timedelta
 import networkx as nx
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from lib.logs_processor import process_log_file_binary, build_graph, find_connections_in_time_range
-
 #Ruta a log
 ruta_log = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/input-file-10000.txt'))
 

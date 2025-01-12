@@ -5,7 +5,7 @@ from datetime import datetime
 import psutil
 from functools import wraps
 
-sys.path.append(os.path.abspath(osc.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from lib.logs_processor  import build_graph, find_connections_in_time_range
 
 def measure_memory_and_cpu(func):
