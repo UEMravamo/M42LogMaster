@@ -77,27 +77,65 @@ Formatea los resultados de las conexiones.
 
 ## Ejemplo de Uso
 ```python
+# Script para listar conexiones de un host en un periodo de tiempo
+
 import datetime as dt
-from log_processor import preprocess_date, process_log_file_binary, format_connections
+import time
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from lib.file_manager import preprocess_date, format_connections
+from lib.logs_processor import process_log_file_binary
 
 if __name__ == "__main__":
-    # Fechas de inicio y fin
-    init_time = preprocess_date("Martes, 13 de agosto de 2019 01:00:00")
-    end_time = preprocess_date("Martes, 13 de agosto de 2019 21:00:00")
-    format_ = "%A, %d de %B de %Y %H:%M:%S"
-    init_datetime = dt.datetime.strptime(init_time, format_)
-    end_datetime = dt.datetime.strptime(end_time, format_)
+    # Cronómetro de inicio
+    start = time.time()
 
-    # Archivo de logs y host objetivo
-    log_file = 'input-file-10000-2.txt'
+    # Configuración de variables
+    log_file = '../data/input-file-10000-2.txt'
     host = 'Savhannah'
+    init_datetime_str = "Martes, 13 de agosto de 2019 01:00:00"
+    end_datetime_str = "Martes, 13 de agosto de 2019 21:00:00"
+    datetime_format = "%A, %d de %B de %Y %H:%M:%S"
 
+    # Validar el archivo
+    if not os.path.exists(log_file):
+        print(f"Error: El archivo '{log_file}' no existe.")
+        sys.exit(1)
+
+    # Validar el host
+    if not isinstance(host, str) or not host.strip():
+        print("Error: El valor del host no es válido. Debe ser una cadena no vacía.")
+        sys.exit(1)
+
+    # Preprocesar y validar fechas
     try:
-        # Procesar el archivo
-        results = process_log_file_binary(log_file, init_datetime, end_datetime, host)
-        print(format_connections(results, host))
+        init_datetime_str = preprocess_date(init_datetime_str)
+        end_datetime_str = preprocess_date(end_datetime_str)
+        init_datetime = dt.datetime.strptime(init_datetime_str, datetime_format)
+        end_datetime = dt.datetime.strptime(end_datetime_str, datetime_format)
+
+        if init_datetime >= end_datetime:
+            raise ValueError("La fecha inicial debe ser anterior a la fecha final.")
+    except ValueError as e:
+        print(f"Error en la configuración de fechas: {e}")
+        sys.exit(1)
+
+    # Procesar conexiones
+    try:
+        connections = process_log_file_binary(log_file, init_datetime, end_datetime, host)
+        print(format_connections(connections, host))
     except FileNotFoundError:
         print(f"Error: El archivo '{log_file}' no existe.")
+    except Exception as e:
+        print(f"Error inesperado durante el procesamiento de conexiones: {e}")
+
+    # Cronómetro de fin
+    end = time.time()
+    print(f"Tiempo total de ejecución: {end - start:.10f} segundos ")
+
 ```
 
 ---
@@ -106,9 +144,7 @@ if __name__ == "__main__":
 - Asumimos que el archivo está en `utf-8`.
 - El script asume que cada línea tiene: tiempo, host origen y host destino.
 - El archivo que se está leyendo es el mismo que hay por defecto pero inflado a 24 millones de líneas.
-
-## TODO's
-- [ ] Más manejo de errores.
-- [ ] Añadir lo del tiempo de los 5 minutos.
-- [ ] Usar PEP8.
+- Se puede cambiar el archivo de logs en la variable `log_file`.
+- Se puede cambiar el host objetivo en la variable `host`.
+- Se puede cambiar el rango de tiempo en las variables `init_datetime_str` y `end_datetime_str`.
 ---
