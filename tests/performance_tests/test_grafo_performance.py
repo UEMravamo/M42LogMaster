@@ -12,7 +12,7 @@ def test_performance():
     # Prerequisitos y precondiciones para ejecutar la función build_graph (import + archivo de logs)
     setup_build_graph = f"""
 # Importar función de la librería
-from lib.log_procesor import build_graph
+from lib.logs_processor import build_graph
 # Ruta al archivo de logs
 log_file = r"{log_file.replace(os.sep, '/')}"
 """
@@ -20,7 +20,7 @@ log_file = r"{log_file.replace(os.sep, '/')}"
     # Prerequisitos y precondiciones para ejecutar la función find_connections_in_time_range (import + archivo de logs)
     setup_find_connections = f"""
 # Importar función de la librería
-from lib.log_procesor import find_connections_in_time_range, build_graph
+from lib.logs_processor import find_connections_in_time_range, build_graph
 from datetime import datetime  # Añadido aquí la importación de datetime
 # Ruta al archivo de logs
 log_file = r"{log_file.replace(os.sep, '/')}"

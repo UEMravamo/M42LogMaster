@@ -117,6 +117,7 @@ if __name__ == "__main__":
     
     
     #### PROCESADO DISTRIBUIDO ####
+    #### PROCESADO DISTRIBUIDO ####
     print("\n-------------------------------------------------------------------------------------------")
     print("MÉTODO 4: PROCESAMIENTO DISTRIBUIDO CON SPARK")
     print("-------------------------------------------------------------------------------------------\n")
@@ -124,6 +125,13 @@ if __name__ == "__main__":
     # Procesamiento con Spark
     try:
         incoming_connections, outgoing_connections = process_log_spark(log_file, host, init_datetime_str, end_datetime_str, datetime_format)
+        
+        if incoming_connections and outgoing_connections:
+            print("\nConexiones entrantes:")
+            incoming_connections.show(truncate=False)
+            print("\nConexiones salientes:")
+            outgoing_connections.show(truncate=False)
+        
         
         if incoming_connections and outgoing_connections:
             print("\nConexiones entrantes:")
