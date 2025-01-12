@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from lib.file_manager import preprocess_date, format_connections
 from lib.logs_processor import process_log_file_binary, build_graph, find_connections_in_time_range
+from lib.logs_processor import process_log_spark, process_log_realtime_spark
 
 if __name__ == "__main__":
     
@@ -97,3 +98,48 @@ if __name__ == "__main__":
     print("MÉTODO 4: PROCESAMIENTO DISTRIBUIDO")
     print("-------------------------------------------------------------------------------------------\n")
     
+    # cronometro de inicio
+    start = time.time()
+
+    # procesamiento con Spark
+    try:
+        incoming_connections, outgoing_connections = process_log_spark(log_file, host, init_datetime_str, end_datetime_str, datetime_format)
+        print("\nConexiones entrantes:")
+        incoming_connections.show(truncate=False)
+        print("\nConexiones salientes:")
+        outgoing_connections.show(truncate=False)
+
+    except Exception as e:
+        print(f"Error en el procesamiento con Spark: {e}")
+        
+    # cronómetro de fin
+    end = time.time()
+    print("\n-------------------------------------------------------------------------------------------")
+    print(f"Método 4 - Procesamiento distribuido con Spark: Tiempo total de ejecución: {end - start:.10f} segundos.\n")
+    print("-------------------------------------------------------------------------------------------\n")
+
+    ## PROCESADO EN TIEMPO REAL CON SPARK ##
+    # crear un nuevo directorio para el log en tiempo real
+    realtime_log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/realtime/'))
+    if not os.path.exists(realtime_log_dir):
+        os.makedirs(realtime_log_dir)
+
+    # iniciar el procesamiento en tiempo real
+    print("\n-------------------------------------------------------------------------------------------")
+    print("MÉTODO 5: PROCESAMIENTO EN TIEMPO REAL CON SPARK")
+    print("-------------------------------------------------------------------------------------------\n")
+
+    try:
+        query = process_log_realtime_spark(realtime_log_dir, host)
+
+        # mantener el proceso principal en ejecución para que el streaming continue
+        # ajusta el tiempo o implementa una condición de salida según tus necesidades
+        while True:
+            time.sleep(60)  # Esperar 60 segundos
+            if input("¿Detener el streaming?[s/n]: ").lower() == 's':
+                if query and hasattr(query, 'stop'):
+                    query.stop()
+                break
+
+    except Exception as e:
+        print(f"Error en el procesamiento en tiempo real con Spark: {e}")
