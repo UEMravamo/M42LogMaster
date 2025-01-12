@@ -51,6 +51,29 @@ if __name__ == "__main__":
     print("\n-------------------------------------------------------------------------------------------")
     print("MÉTODO 1: PROCESADO SECUENCIAL")
     print("-------------------------------------------------------------------------------------------\n")
+    def process_logs(log_file, init_datetime, end_datetime, host):
+    
+      init_timestamp = int(init_datetime.timestamp())
+      end_timestamp = int(end_datetime.timestamp())
+
+      connections = set()
+
+      with open(log_file, 'r') as log:
+          for line in log:
+             ts, src, dest = line.strip().split()
+             ts = int(ts) // 1000           
+             if init_timestamp <= ts <= end_timestamp:
+                
+                if dest == host:
+                    connections.add(src)
+                elif src == host:
+                    connections.add(dest)
+      return connections
+  
+    connected_hosts = process_logs(log_file, init_datetime, end_datetime, host)
+   
+    for connected_host in connected_hosts:
+     print(connected_host)
 
 
     #### V2-PROCESADO CON GRAFO ####
