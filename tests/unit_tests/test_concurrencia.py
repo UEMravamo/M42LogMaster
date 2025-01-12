@@ -165,3 +165,39 @@ def test_process_log_file_binary_decoding_error():
 
     assert results["entrantes"] == {}
     assert results["salientes"] == {"host2": 1}
+
+def run_tests():
+    tests = [
+        test_process_chunk_binary_empty_chunk,
+        test_process_chunk_binary_no_target_host,
+        test_merge_results_empty,
+        test_merge_results_partial_data,
+        test_process_log_file_binary_empty_file,
+        test_process_log_file_binary_with_only_invalid_lines,
+        test_process_log_file_binary_file_not_found,
+        test_process_chunk_binary_time_range,
+        test_process_log_file_binary_large_file,
+        test_process_log_file_binary_decoding_error,
+    ]
+
+    passed = 0
+    failed = 0
+
+    for test in tests:
+        try:
+            test()
+            print(f"{test.__name__}: PASSED")
+            passed += 1
+        except AssertionError as e:
+            print(f"{test.__name__}: FAILED - {str(e)}")
+            failed += 1
+        except Exception as e:
+            print(f"{test.__name__}: FAILED with unexpected error - {str(e)}")
+            failed += 1
+
+    print("\nSummary:")
+    print(f"Passed: {passed}")
+    print(f"Failed: {failed}")
+
+if __name__ == "__main__":
+    run_tests()

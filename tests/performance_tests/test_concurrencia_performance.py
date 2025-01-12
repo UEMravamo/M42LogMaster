@@ -10,7 +10,7 @@ from lib.logs_processor import process_chunk_binary, merge_results, process_log_
 
 def test_process_log_file_binary_performance():
     """Prueba de rendimiento para un archivo grande."""
-    log_data = """1629190000000 host1 host2\n""" * 100000  # Archivo simulado grande
+    log_data = """1629190000000 host1 host2\n""" * 100000
 
     init_ = datetime.fromtimestamp(1629190000)
     end_ = datetime.fromtimestamp(1629190600)
@@ -27,6 +27,21 @@ def test_process_log_file_binary_performance():
             os.remove(temp_file.name)
 
         end_time = time.time()
+
+        print("Resultados obtenidos:", results)
+        print("Tiempo de ejecución:", end_time - start_time, "segundos")
+
         assert results["salientes"] == {"host2": 100000}
         assert (end_time - start_time) < 5, "El procesamiento tardó más de 5 segundos"
 
+def run_test_performance():
+    try:
+        test_process_log_file_binary_performance()
+        print("test_process_log_file_binary_performance: PASSED")
+    except AssertionError as e:
+        print(f"test_process_log_file_binary_performance: FAILED - {str(e)}")
+    except Exception as e:
+        print(f"test_process_log_file_binary_performance: FAILED with unexpected error - {str(e)}")
+
+if __name__ == "__main__":
+    run_test_performance()
