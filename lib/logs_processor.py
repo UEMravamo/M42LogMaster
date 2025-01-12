@@ -1,5 +1,5 @@
 # Librería para procesamiento y análisis de logs
-import datetime
+from datetime import datetime
 import itertools
 from collections import defaultdict
 import multiprocessing
@@ -113,7 +113,7 @@ def build_graph(log_file):
             host_to = parts[2]
 
             # Convertir timestamp a formato datetime
-            timestamp_datetime = datetime.datetime.utcfromtimestamp(timestamp / 1000)
+            timestamp_datetime = datetime.utcfromtimestamp(timestamp / 1000)
             timestamp_str = timestamp_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
             # Añadir nodos (hosts) al grafo
