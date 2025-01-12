@@ -187,119 +187,82 @@ def process_log_file_binary(file_, init_, end_, target_host, num_workers=None):
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'lib')))
 
 def process_log_spark(log_file, hostname, start_datetime_str, end_datetime_str, datetime_format="%A, %d de %B de %Y %H:%M:%S"):
+    spark = None
+    try:
+        print("Configurando Spark...")
+        
+        # Configuración más ligera de Spark
+        spark = (SparkSession.builder
+            .appName("LogProcessorSpark")
+            .config("spark.driver.memory", "1g")
+            .config("spark.executor.memory", "1g")
+            .config("spark.sql.session.timeZone", "UTC")
+            .config("spark.driver.maxResultSize", "1g")
+            .config("spark.driver.bindAddress", "127.0.0.1")  # Forzar localhost
+            .config("spark.driver.host", "127.0.0.1")        # Forzar localhost
+            .master("local[2]")  # Usar solo 2 cores en lugar de todos
+            .getOrCreate())
 
-    """
-    Procesa un archivo de log con spark para encontrar conexiones en un rango de tiempo
+        # Reducir el nivel de log de Spark
+        spark.sparkContext.setLogLevel("ERROR")
+        
+        print("SparkSession creada exitosamente")
+        
+        # Convertir fechas
+        print("Procesando fechas...")
+        start_datetime = datetime.strptime(preprocess_date(start_datetime_str), datetime_format)
+        end_datetime = datetime.strptime(preprocess_date(end_datetime_str), datetime_format)
+        
+        print(f"Leyendo archivo: {log_file}")
+        # Leer el archivo de log como un dataframe con schema explícito
+        df = spark.read.text(log_file)
+        print(f"Registros totales leídos: {df.count()}")
 
-    log_file(str): ruta al archivo de log
-    hostname(str): hostname para el cual buscar conexiones
-    start_datetime_str(str): cadena de fecha y hora de inicio
-    end_datetime_str(str): cadena de fecha y hora de fin
-    datetime_format(str): formato de la cadena de fecha y hora
+        # Procesar y transformar los datos
+        print("Transformando datos...")
+        df = df.select(
+            (col("value").substr(1, 10).cast("long") * 1000).alias("timestamp"),
+            split(col("value"), " ")[1].alias("host_from"),
+            split(col("value"), " ")[2].alias("host_to")
+        ).cache()  # Cachear el DataFrame para mejor rendimiento
 
-    dataframe: dataframe de spark con las conexiones encontradas
-    """
-    #inicializar sparksession
-    spark = SparkSession.builder \
-        .appName("LogProcessorSpark") \
-        .getOrCreate()
-    
-    start_datetime = datetime.strptime(preprocess_date(start_datetime_str), datetime_format)
-    end_datetime = datetime.strptime(preprocess_date(end_datetime_str), datetime_format)
+        # Convertir timestamp a datetime
+        df = df.withColumn("datetime", to_timestamp(col("timestamp") / 1000))
+        
+        print("Aplicando filtros temporales...")
+        df_filtered = df.filter(
+            (col("datetime") >= start_datetime) & 
+            (col("datetime") <= end_datetime)
+        ).cache()
 
-    #leer el archivo de log como un dataframe
-    df=spark.read.text(log_file)
+        print(f"Buscando conexiones para el host: {hostname}")
+        # Filtrar y contar conexiones
+        connections_in = df_filtered.filter(col("host_to") == hostname)
+        connections_out = df_filtered.filter(col("host_from") == hostname)
 
-    df = df.select(
-        (col("value").substr(1, 10) * 1000).cast("long").alias("timestamp"),
-        col("value").substr(12, length(split(col("value"), " ")[1])).alias("host_from"),
-        split(col("value"), " ")[2].alias("host_to")
-    )
+        # Agregar y ordenar resultados
+        incoming_connections = connections_in.groupBy("host_from") \
+            .agg(count("*").alias("count")) \
+            .orderBy(desc("count"))
 
-    #Convertir timestamp a formato datetime
-    df = df.withColumn("datetime", to_timestamp(col("timestamp") / 1000))
+        outgoing_connections = connections_out.groupBy("host_to") \
+            .agg(count("*").alias("count")) \
+            .orderBy(desc("count"))
 
-    #filtrar por rango de tiempo
-    df = df.filter((col("datetime") >= start_datetime) & (col("datetime") <= end_datetime))
+        # Forzar la evaluación de los DataFrames
+        incoming_count = incoming_connections.count()
+        outgoing_count = outgoing_connections.count()
+        
+        print(f"Conexiones encontradas - Entrantes: {incoming_count}, Salientes: {outgoing_count}")
+        
+        return incoming_connections, outgoing_connections
 
-    #filtrar por hostname
-    connections_in = df.filter(col("host_to") == hostname)
-    connections_out = df.filter(col("host_from") == hostname)
+    except Exception as e:
+        print(f"Error en el procesamiento Spark: {str(e)}")
+        raise e
 
-    #agrupar por host y contar conexiones
-    incoming_connections = connections_in.groupBy("host_from").agg(count("*").alias("count")).orderBy(col("count"), ascending=False)
-    outgoing_connections = connections_out.groupBy("host_to").agg(count("*").alias("count")).orderBy(col("count"), ascending=False)
-
-    return incoming_connections, outgoing_connections
-
-def process_log_realtime_spark(log_file, hostname):
-    """
-    procesa un archivo de log en tiempo real con Spark Streaming.
-
-        log_file (str): Ruta al archivo de log.
-        hostname (str): Hostname para el cual buscar conexiones.
-
-        streamingQuery: Consulta de streaming de Spark.
-    """
-
-    spark = SparkSession.builder \
-        .appName("LogProcessorRealtimeSpark") \
-        .getOrCreate()
-
-    # definir el esquema para el streaming
-    schema = "timestamp BIGINT, host_from STRING, host_to STRING"
-
-    # crear un stream de datos desde el archivo de log
-    lines = spark.readStream \
-        .schema(schema) \
-        .option("maxFilesPerTrigger", 1) \
-        .text(log_file)
-
-    # parsear la línea de log
-    parsed_lines = lines.select(
-        (col("value").substr(1, 10) * 1000).cast("long").alias("timestamp"),
-        col("value").substr(12, length(split(col("value"), " ")[1])).alias("host_from"),
-        split(col("value"), " ")[2].alias("host_to")
-    )
-
-    # convertir timestamp a formato datetime y crear una columna de ventana de tiempo
-    parsed_lines = parsed_lines.withColumn("datetime", to_timestamp(col("timestamp") / 1000)) \
-        .withWatermark("datetime", "1 hour") \
-        .withColumn("window", window(col("datetime"), "1 hour", "1 hour"))
-
-    # filtrar por hostname
-    connections_in = parsed_lines.filter(col("host_to") == hostname)
-    connections_out = parsed_lines.filter(col("host_from") == hostname)
-
-    # agrupar por ventana de tiempo y host, y contar conexiones
-    incoming_connections = connections_in.groupBy("window", "host_from").agg(count("*").alias("count"))
-    outgoing_connections = connections_out.groupBy("window", "host_to").agg(count("*").alias("count"))
-
-    # encontrar el host con más conexiones generadas en la última hora
-    top_sender = parsed_lines.groupBy("window", "host_from").agg(count("*").alias("count")).orderBy(col("count"), ascending=False).limit(1)
-
-    # iniciar la consulta de streaming para las conexiones entrantes
-    query_in = incoming_connections.writeStream \
-        .outputMode("complete") \
-        .format("console") \
-        .option("truncate", "false") \
-        .start()
-
-    # iniciar la consulta de streaming para las conexiones salientes
-    query_out = outgoing_connections.writeStream \
-        .outputMode("complete") \
-        .format("console") \
-        .option("truncate", "false") \
-        .start()
-
-    # iniciar la consulta de streaming para el host con más conexiones generadas
-    query_top_sender = top_sender.writeStream \
-        .outputMode("complete") \
-        .format("console") \
-        .option("truncate", "false") \
-        .start()
-
-    # esperar a que la consulta termine
-    query_in.awaitTermination()
-    query_out.awaitTermination()
-    query_top_sender.awaitTermination()
+    finally:
+        if spark:
+            print("Cerrando sesión Spark...")
+            spark.stop()
+            print("Sesión Spark cerrada")
