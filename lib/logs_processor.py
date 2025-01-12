@@ -9,7 +9,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, to_timestamp, window, count, desc, split, length
 from datetime import datetime
 import sys
-from file_manager import preprocess_date
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from lib.file_manager import preprocess_date
 
 ### Version secuencial ###
 
